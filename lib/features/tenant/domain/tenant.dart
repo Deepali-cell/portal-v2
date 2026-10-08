@@ -76,14 +76,14 @@ class Tenant {
       Tenant.fromResolveResponse(json);
 
   /// Built-in default — used as the very first theme on a fresh install,
-  /// before any tenant is resolved. Matches TCB Infotech's brand.
+  /// before any tenant is resolved. Matches the app's own (Workora) logo.
   static const Tenant tcbDefault = Tenant(
-    companyId: 'TCB',
+    companyId: '',
     companyName: AppConfig.brandName,
     serverUrl: '',
     colorP1: Color(0xFFFFFFFF),
-    colorP2: Color(0xFF022B60),
-    colorP3: Color(0xFF1F4FD8),
+    colorP2: Color(0xFF312E81),
+    colorP3: Color(0xFF7C3AED),
   );
 }
 

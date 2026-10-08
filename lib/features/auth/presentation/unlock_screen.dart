@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../core/config/app_config.dart';
 import '../../../core/security/biometric_service.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_dimens.dart';
@@ -46,7 +47,7 @@ class _UnlockScreenState extends ConsumerState<UnlockScreen> {
       return;
     }
     setState(() => _checking = true);
-    final ok = await biometrics.authenticate(reason: 'Unlock TCB Portal');
+    final ok = await biometrics.authenticate(reason: 'Unlock ${AppConfig.brandName}');
     if (!mounted) return;
     if (ok) {
       _unlock();

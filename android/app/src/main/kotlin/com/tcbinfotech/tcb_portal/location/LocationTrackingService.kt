@@ -162,7 +162,7 @@ class LocationTrackingService : Service() {
 
         return NotificationCompat.Builder(this, CHANNEL_ID)
             .setSmallIcon(R.mipmap.ic_launcher)
-            .setContentTitle("TCB Portal: sharing your location")
+            .setContentTitle("${applicationInfo.loadLabel(packageManager)}: sharing your location")
             .setContentText("Your manager can see where you are while this is on.")
             .setOngoing(true)
             .setPriority(NotificationCompat.PRIORITY_LOW)

@@ -44,7 +44,7 @@ class ApiException implements Exception {
       case DioExceptionType.badCertificate:
         return const ApiException(
           ApiErrorKind.network,
-          "Secure connection failed. The server's certificate could not be verified. Contact TCB Infotech if this keeps happening.",
+          "Secure connection failed. The server's certificate could not be verified. Contact your company admin if this keeps happening.",
         );
       case DioExceptionType.cancel:
         return const ApiException(ApiErrorKind.unknown, 'Request cancelled.');
@@ -82,7 +82,7 @@ class ApiException implements Exception {
     if (under.contains('failed host lookup')) {
       return const ApiException(
         ApiErrorKind.network,
-        "Can't reach the server. The address could not be looked up. Check your internet, or contact TCB Infotech if you keep seeing this.",
+        "Can't reach the server. The address could not be looked up. Check your internet, or contact your company admin if you keep seeing this.",
       );
     }
 
@@ -94,7 +94,7 @@ class ApiException implements Exception {
         under.contains('connection reset')) {
       return const ApiException(
         ApiErrorKind.network,
-        "Can't reach this company's server. The server may be down, or the URL configured for this company is unreachable. Contact TCB Infotech to check the configuration.",
+        "Can't reach this company's server. The server may be down, or the URL configured for this company is unreachable. Contact your company admin to check the configuration.",
       );
     }
 
@@ -103,7 +103,7 @@ class ApiException implements Exception {
     if (under.contains('timed out') || under.contains('timeout')) {
       return const ApiException(
         ApiErrorKind.timeout,
-        "The server didn't respond in time. Check your internet and try again, or contact TCB Infotech if this keeps happening.",
+        "The server didn't respond in time. Check your internet and try again, or contact your company admin if this keeps happening.",
       );
     }
 
@@ -111,7 +111,7 @@ class ApiException implements Exception {
     // that it could be either, and what to try.
     return const ApiException(
       ApiErrorKind.network,
-      "Couldn't reach the server. This could be a network problem on your side, or the server is unavailable. Try again, or contact TCB Infotech if this keeps happening.",
+      "Couldn't reach the server. This could be a network problem on your side, or the server is unavailable. Try again, or contact your company admin if this keeps happening.",
     );
   }
 
@@ -167,7 +167,7 @@ class ApiException implements Exception {
         return ApiException(
           ApiErrorKind.server,
           serverMsg ??
-              'The server hit an unexpected problem. Please try again, or contact TCB Infotech if this keeps happening.',
+              'The server hit an unexpected problem. Please try again, or contact your company admin if this keeps happening.',
           statusCode: code,
         );
       case 502:
@@ -177,7 +177,7 @@ class ApiException implements Exception {
         return ApiException(
           ApiErrorKind.server,
           serverMsg ??
-              "The server is not responding right now. Please try again in a few minutes, or contact TCB Infotech if this keeps happening.",
+              "The server is not responding right now. Please try again in a few minutes, or contact your company admin if this keeps happening.",
           statusCode: code,
         );
       case 503:
@@ -211,7 +211,7 @@ class ApiException implements Exception {
         return ApiException(
           ApiErrorKind.server,
           serverMsg ??
-              'The server is temporarily unreachable. Please try again in a minute. If this keeps happening, contact TCB Infotech.',
+              'The server is temporarily unreachable. Please try again in a minute. If this keeps happening, contact your company admin.',
           statusCode: code,
         );
 
@@ -220,7 +220,7 @@ class ApiException implements Exception {
           return ApiException(
             ApiErrorKind.server,
             serverMsg ??
-                'The server is having trouble right now. Please try again in a moment, or contact TCB Infotech if this keeps happening.',
+                'The server is having trouble right now. Please try again in a moment, or contact your company admin if this keeps happening.',
             statusCode: code,
           );
         }
@@ -228,7 +228,7 @@ class ApiException implements Exception {
           return ApiException(
             ApiErrorKind.unknown,
             serverMsg ??
-                'The request could not be completed. Please try again, or contact TCB Infotech if this keeps happening.',
+                'The request could not be completed. Please try again, or contact your company admin if this keeps happening.',
             statusCode: code,
           );
         }

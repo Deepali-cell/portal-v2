@@ -64,7 +64,7 @@ class TenantRepository {
       if (!AppConfig.isAllowedServerUrl(tenant.serverUrl)) {
         throw const ApiException(
           ApiErrorKind.unknown,
-          'This company server is not set up for secure (https) access. Contact TCB Infotech.',
+          'This company server is not set up for secure (https) access. Contact your company admin.',
         );
       }
       return tenant;

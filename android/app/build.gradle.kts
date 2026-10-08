@@ -44,7 +44,7 @@ android {
         versionName = flutter.versionName
 
         // Launcher name. Overridden per company by tool/build_company_apk.sh.
-        manifestPlaceholders["appLabel"] = xmlEscape(brandName ?: "TCB Portal")
+        manifestPlaceholders["appLabel"] = xmlEscape(brandName ?: "Workora")
         if (brandId != null) {
             // Own package per company, so each company's app installs and
             // updates on its own.

@@ -25,9 +25,9 @@
 	<key>CFBundleDevelopmentRegion</key>
 	<string>$(DEVELOPMENT_LANGUAGE)</string>
 	<key>CFBundleDisplayName</key>
-	<string>TCB Portal</string>
+	<string>Workora</string>
 	<key>NSFaceIDUsageDescription</key>
-	<string>Use Face ID to securely unlock the TCB Portal.</string>
+	<string>Use Face ID to securely unlock the app.</string>
 	<key>NSLocationWhenInUseUsageDescription</key>
 	<string>Your location is used to verify you are at an approved office when checking in.</string>
 	<key>NSCameraUsageDescription</key>

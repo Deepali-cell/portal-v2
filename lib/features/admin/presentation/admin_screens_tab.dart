@@ -102,7 +102,7 @@ class _AdminScreensTabState extends ConsumerState<AdminScreensTab> {
               children: [
                 Text(
                   'Turn screens off for everyone in your company. Modules come '
-                  'from your TCB licence; role permissions still apply on top.',
+                  'from your licence; role permissions still apply on top.',
                   style: TextStyle(
                     color: AppColors.onSurfaceVariant,
                     fontSize: 13,
@@ -166,7 +166,7 @@ class _AdminScreensTabState extends ConsumerState<AdminScreensTab> {
             subtitle: Text(
               m.enabled
                   ? '$onCount of ${ids.length} screens on'
-                  : 'Not in your licence. Contact TCB Infotech to enable.',
+                  : 'Not in your licence. Contact your provider to enable.',
               style: TextStyle(fontSize: 12, color: AppColors.onSurfaceVariant),
             ),
             leading: Icon(

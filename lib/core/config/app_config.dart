@@ -43,7 +43,7 @@ class AppConfig {
   /// Display name shown before the tenant is resolved (first launch).
   static const String brandName = String.fromEnvironment(
     'BRAND_NAME',
-    defaultValue: 'TCB Portal',
+    defaultValue: 'Workora',
   );
 
   static bool get isBrandedBuild => brandCompanyId.isNotEmpty;

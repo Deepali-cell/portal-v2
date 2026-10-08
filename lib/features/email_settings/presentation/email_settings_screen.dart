@@ -40,7 +40,7 @@ const _appPwGuides = <String, ({String url, String urlLabel, List<String> steps}
     steps: [
       'Turn on 2-Step Verification for your Google account first (App Passwords only appear after it is on).',
       'Open myaccount.google.com/apppasswords (sign in if asked).',
-      'Type a name like "TCB Portal" and tap Create.',
+      'Type a name like "Workora" and tap Create.',
       'Google shows a 16-character code — copy it.',
       'Paste that code into the Password field here (no spaces needed).',
     ],
@@ -61,7 +61,7 @@ const _appPwGuides = <String, ({String url, String urlLabel, List<String> steps}
     steps: [
       'Open login.yahoo.com/account/security.',
       'Tap "Generate app password" (or Manage app passwords).',
-      'Pick "Other app", name it "TCB Portal", and Generate.',
+      'Pick "Other app", name it "Workora", and Generate.',
       'Copy the code shown and paste it into the Password field here.',
     ],
   ),

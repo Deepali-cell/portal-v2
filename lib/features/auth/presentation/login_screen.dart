@@ -168,7 +168,7 @@ class _CompanyIdStepState extends ConsumerState<_CompanyIdStep> {
       if (mounted) {
         setState(
           () => _error =
-              "Couldn't connect to the TCB server. Check your internet, then try again. Contact TCB Infotech if this keeps happening.",
+              "Couldn't connect to the server. Check your internet, then try again. Contact your company admin if this keeps happening.",
         );
       }
     } finally {
@@ -206,7 +206,7 @@ class _CompanyIdStepState extends ConsumerState<_CompanyIdStep> {
                 onFieldSubmitted: (_) => _continue(),
                 decoration: const InputDecoration(
                   labelText: 'Company ID',
-                  hintText: 'e.g. TCB',
+                  hintText: 'e.g. ACME',
                   prefixIcon: Icon(Icons.domain_outlined),
                 ),
                 validator: (v) => (v == null || v.trim().isEmpty)
@@ -228,7 +228,7 @@ class _CompanyIdStepState extends ConsumerState<_CompanyIdStep> {
                 const SizedBox(height: AppDimens.md),
                 const _HelpHint(
                   icon: Icons.help_outline_rounded,
-                  text: "Don't know your Company ID? Contact TCB Infotech.",
+                  text: "Don't know your Company ID? Ask your HR or admin.",
                 ),
               ],
             ],
@@ -308,7 +308,7 @@ class _ServerDialogState extends State<_ServerDialog> {
         children: [
           Text(
             'The server that looks up your Company ID at login. Change it only '
-            'if TCB told you to, or to point at your own control server.',
+            'if your admin told you to, or to point at your own control server.',
             style: Theme.of(context).textTheme.bodySmall,
           ),
           const SizedBox(height: AppDimens.md),
@@ -391,7 +391,7 @@ class _SignInStepState extends ConsumerState<_SignInStep> {
       if (mounted) {
         setState(
           () => _error =
-              "Sign-in failed for an unknown reason. Please try again. If it keeps failing, contact TCB Infotech.",
+              "Sign-in failed for an unknown reason. Please try again. If it keeps failing, contact your company admin.",
         );
       }
     } finally {

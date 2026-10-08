@@ -14,7 +14,7 @@ enum DataDisclosure {
   calls(
     title: 'Call logging for your leads',
     body:
-        'TCB Portal reads your phone state, call log and contacts to recognise '
+        'This app reads your phone state, call log and contacts to recognise '
         'when you call or are called by a lead or customer. After such a '
         'call it uploads the call details and the recording saved by your '
         "phone's recorder to your company's ERP, where it is transcribed and "
@@ -28,7 +28,7 @@ enum DataDisclosure {
   backgroundLocation(
     title: 'Location while you are on duty',
     body:
-        "TCB Portal collects your location to show your manager your field "
+        "This app collects your location to show your manager your field "
         'visits and route during working hours, even when the app is closed '
         'or not in use.\n\n'
         "Location is sent only to your company's ERP and only while tracking "

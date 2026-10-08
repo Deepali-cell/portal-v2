@@ -79,7 +79,7 @@ class MainActivity : FlutterFragmentActivity() {
                 "ping" -> result.success("pong")
                 "postLocalNotification" -> {
                     val args = call.arguments as? Map<*, *>
-                    val title = args?.get("title") as? String ?: "TCB Portal"
+                    val title = args?.get("title") as? String ?: applicationInfo.loadLabel(packageManager).toString()
                     val body = args?.get("body") as? String ?: ""
                     val deeplink = args?.get("deeplink") as? String
                     val id = (args?.get("id") as? Number)?.toInt()

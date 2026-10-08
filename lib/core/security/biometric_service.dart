@@ -2,6 +2,8 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:local_auth/local_auth.dart';
 
+import '../config/app_config.dart';
+
 final biometricServiceProvider =
     Provider<BiometricService>((ref) => BiometricService());
 
@@ -33,7 +35,7 @@ class BiometricService {
   }
 
   /// Prompts the user. Returns true only on a successful unlock.
-  Future<bool> authenticate({String reason = 'Unlock TCB Portal'}) async {
+  Future<bool> authenticate({String reason = 'Unlock ${AppConfig.brandName}'}) async {
     try {
       return await _auth.authenticate(
         localizedReason: reason,
