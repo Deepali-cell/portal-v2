@@ -1,5 +1,7 @@
 import 'dart:ui';
 
+import '../../../core/config/app_config.dart';
+
 /// Resolved tenant configuration returned by
 /// `tcb_portal_control.api.tenant.resolve` on the middleware.
 ///
@@ -77,7 +79,7 @@ class Tenant {
   /// before any tenant is resolved. Matches TCB Infotech's brand.
   static const Tenant tcbDefault = Tenant(
     companyId: 'TCB',
-    companyName: 'TCB Portal',
+    companyName: AppConfig.brandName,
     serverUrl: '',
     colorP1: Color(0xFFFFFFFF),
     colorP2: Color(0xFF022B60),

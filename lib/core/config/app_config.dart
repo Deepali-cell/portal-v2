@@ -32,6 +32,22 @@ class AppConfig {
     defaultValue: '',
   );
 
+  /// Company this build is branded for. Set by tool/build_company_apk.sh;
+  /// when non-empty the app resolves this company itself instead of asking
+  /// the user for a Company ID.
+  static const String brandCompanyId = String.fromEnvironment(
+    'BRAND_COMPANY_ID',
+    defaultValue: '',
+  );
+
+  /// Display name shown before the tenant is resolved (first launch).
+  static const String brandName = String.fromEnvironment(
+    'BRAND_NAME',
+    defaultValue: 'TCB Portal',
+  );
+
+  static bool get isBrandedBuild => brandCompanyId.isNotEmpty;
+
   /// Frappe site name. Only sent as a `Host` header when [sendHostHeader] is
   /// true (local multi-site dev over HTTP). Never override Host on an HTTPS
   /// domain.

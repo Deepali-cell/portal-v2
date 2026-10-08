@@ -8,6 +8,17 @@ plugins {
     id("dev.flutter.flutter-gradle-plugin")
 }
 
+// Company branding, passed by tool/build_company_apk.sh as
+// --android-project-arg=brandName=... etc. All optional.
+val brandName = (project.findProperty("brandName") as String?)?.takeIf { it.isNotBlank() }
+val brandId = (project.findProperty("brandId") as String?)
+    ?.lowercase()?.replace(Regex("[^a-z0-9]"), "")?.takeIf { it.isNotEmpty() }
+    ?.let { if (it[0].isDigit()) "c$it" else it }
+val brandIconDir = (project.findProperty("brandIconDir") as String?)?.takeIf { it.isNotBlank() }
+
+fun xmlEscape(s: String) = s.replace("&", "&amp;").replace("<", "&lt;")
+    .replace(">", "&gt;").replace("\"", "&quot;")
+
 android {
     namespace = "com.tcbinfotech.tcb_portal"
     compileSdk = flutter.compileSdkVersion
@@ -31,6 +42,20 @@ android {
         targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode
         versionName = flutter.versionName
+
+        // Launcher name. Overridden per company by tool/build_company_apk.sh.
+        manifestPlaceholders["appLabel"] = xmlEscape(brandName ?: "TCB Portal")
+        if (brandId != null) {
+            // Own package per company, so each company's app installs and
+            // updates on its own.
+            applicationIdSuffix = "." + brandId
+        }
+    }
+
+    // Company launcher icons (mipmap-*/ic_launcher.png). The release source
+    // set takes priority over main, so these replace the default icon.
+    if (brandIconDir != null) {
+        sourceSets.getByName("release").res.srcDir(brandIconDir)
     }
 
     // Play upload key. android/key.properties (git-ignored) points at the

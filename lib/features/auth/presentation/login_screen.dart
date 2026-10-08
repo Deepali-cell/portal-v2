@@ -98,6 +98,14 @@ class _CompanyIdStepState extends ConsumerState<_CompanyIdStep> {
   void initState() {
     super.initState();
     _loadControlUrl();
+    // A company-branded build already knows its company: resolve it straight
+    // away instead of asking for the ID.
+    if (AppConfig.isBrandedBuild) {
+      _idCtrl.text = AppConfig.brandCompanyId;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) _continue();
+      });
+    }
   }
 
   Future<void> _loadControlUrl() async {
@@ -177,17 +185,22 @@ class _CompanyIdStepState extends ConsumerState<_CompanyIdStep> {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           const _AuthHeader(
-            title: 'Welcome to TCB Portal',
+            title: 'Welcome to ${AppConfig.brandName}',
             subtitle: 'Your whole workday, in one place.',
           ),
           const SizedBox(height: AppDimens.xl),
           _AuthCard(
             stepLabel: 'Step 1 of 2',
-            heading: 'Find your company',
-            caption: 'Enter the Company ID shared by your admin.',
+            heading: AppConfig.isBrandedBuild
+                ? 'Connecting to your company'
+                : 'Find your company',
+            caption: AppConfig.isBrandedBuild
+                ? 'Setting up the app for ${AppConfig.brandName}.'
+                : 'Enter the Company ID shared by your admin.',
             children: [
               TextFormField(
                 controller: _idCtrl,
+                readOnly: AppConfig.isBrandedBuild,
                 textCapitalization: TextCapitalization.characters,
                 textInputAction: TextInputAction.done,
                 onFieldSubmitted: (_) => _continue(),
@@ -206,16 +219,18 @@ class _CompanyIdStepState extends ConsumerState<_CompanyIdStep> {
               ],
               const SizedBox(height: AppDimens.lg),
               BrandButton(
-                label: 'Continue',
+                label: AppConfig.isBrandedBuild ? 'Retry' : 'Continue',
                 icon: Icons.arrow_forward_rounded,
                 loading: _submitting,
                 onPressed: _continue,
               ),
-              const SizedBox(height: AppDimens.md),
-              const _HelpHint(
-                icon: Icons.help_outline_rounded,
-                text: "Don't know your Company ID? Contact TCB Infotech.",
-              ),
+              if (!AppConfig.isBrandedBuild) ...[
+                const SizedBox(height: AppDimens.md),
+                const _HelpHint(
+                  icon: Icons.help_outline_rounded,
+                  text: "Don't know your Company ID? Contact TCB Infotech.",
+                ),
+              ],
             ],
           ),
           const SizedBox(height: AppDimens.md),
