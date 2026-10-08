@@ -500,14 +500,18 @@ class _SignInStepState extends ConsumerState<_SignInStep> {
                 loading: _submitting,
                 onPressed: _submit,
               ),
-              const SizedBox(height: AppDimens.sm),
-              Center(
-                child: TextButton.icon(
-                  onPressed: _submitting ? null : _switchCompany,
-                  icon: const Icon(Icons.swap_horiz_rounded, size: 18),
-                  label: const Text('Switch company'),
+              // A company-branded build is locked to its company: switching
+              // would just re-resolve the same one, so don't offer it.
+              if (!AppConfig.isBrandedBuild) ...[
+                const SizedBox(height: AppDimens.sm),
+                Center(
+                  child: TextButton.icon(
+                    onPressed: _submitting ? null : _switchCompany,
+                    icon: const Icon(Icons.swap_horiz_rounded, size: 18),
+                    label: const Text('Switch company'),
+                  ),
                 ),
-              ),
+              ],
             ],
           ),
           const SizedBox(height: AppDimens.lg),
