@@ -8,6 +8,9 @@ import '../../../core/router/nav_history.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_dimens.dart';
 import '../../auth/application/auth_controller.dart';
+import '../../../shared/widgets/brand_wordmark.dart';
+import '../../tenant/application/tenant_controller.dart';
+import '../../tenant/domain/tenant.dart';
 import 'nav_destinations.dart';
 
 /// One resolved nav tile: either a top-level destination (Home) or a module
@@ -296,12 +299,14 @@ class _BottomNavItem extends StatelessWidget {
   }
 }
 
-class _SideRail extends StatelessWidget {
+class _SideRail extends ConsumerWidget {
   const _SideRail({required this.tiles});
   final List<_NavTile> tiles;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final companyName = ref.watch(tenantControllerProvider)?.companyName ??
+        Tenant.tcbDefault.companyName;
     return Container(
       width: AppDimens.sidebarWidth,
       margin: const EdgeInsets.all(12),
@@ -320,31 +325,16 @@ class _SideRail extends StatelessWidget {
         children: [
           Row(
             children: [
-              Container(
-                width: 44,
-                height: 44,
-                decoration: BoxDecoration(
-                  gradient: AppColors.heroGradient,
-                  borderRadius: BorderRadius.circular(14),
-                ),
-                alignment: Alignment.center,
-                child: const Text(
-                  'TCB',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontWeight: FontWeight.w800,
-                    fontSize: 13,
-                    letterSpacing: 0.5,
-                  ),
-                ),
-              ),
+              const BrandWordmark(size: 44, showLabel: false),
               const SizedBox(width: AppDimens.sm + 4),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'TCB Portal',
+                      companyName,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
                       style: Theme.of(context).textTheme.titleMedium,
                     ),
                     Text(

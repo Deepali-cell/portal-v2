@@ -52,7 +52,7 @@ class TcbPortalApp extends ConsumerWidget {
       child: DeeplinkListener(
       child: PostCallResumeListener(
       child: MaterialApp.router(
-        title: 'TCB Portal',
+        title: tenant.companyName,
         debugShowCheckedModeBanner: false,
         theme: AppTheme.light,
         // Light-mode only: force the light theme regardless of system setting.

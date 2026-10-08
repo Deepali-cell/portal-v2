@@ -15,6 +15,8 @@ import '../../auth/domain/profile.dart';
 import '../../leave/application/leave_controller.dart';
 import '../../leave/domain/models.dart';
 import '../../notifications/application/notifications_controller.dart';
+import '../../tenant/application/tenant_controller.dart';
+import '../../tenant/domain/tenant.dart';
 import 'nav_destinations.dart';
 
 /// Home screen. Three blocks, top to bottom:
@@ -139,7 +141,10 @@ class _HomeAppBar extends ConsumerWidget implements PreferredSizeWidget {
               mainAxisSize: MainAxisSize.min,
               children: [
                 Text(
-                  'TCB Portal',
+                  ref.watch(tenantControllerProvider)?.companyName ??
+                      Tenant.tcbDefault.companyName,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
                   style: theme.textTheme.labelMedium?.copyWith(
                     color: AppColors.onSurfaceVariant,
                   ),
