@@ -139,14 +139,17 @@ class AppPalette {
     final surfaceDim = mix(p1, p3, 0.20);
     // Page background sits a hair off-white (#FAFAFA on a white P1) so white
     // cards lift off it, matching tcbinfotech.com.
-    final background = mix(p1, Colors.black, 0.02);
+    // Cool, airy canvas: a soft blue-grey tinted a touch toward the brand
+    // accent so white cards float on it.
+    final background = mix(const Color(0xFFF4F6FB), p3, 0.025);
 
     // Inks — derived from P2 (the primary brand).
     final onSurface = mix(p2, Colors.black, 0.0);
-    final onSurfaceVariant = lighten(p2, 0.20);
+    // Neutral slate for secondary text — easier to read than a tinted blue.
+    final onSurfaceVariant = mix(const Color(0xFF5B6478), p2, 0.18);
     final onBackground = onSurface;
-    final outline = mix(p2, Colors.white, 0.55);
-    final outlineVariant = mix(p2, Colors.white, 0.80);
+    final outline = mix(const Color(0xFF8A93A6), p2, 0.12);
+    final outlineVariant = mix(p2, const Color(0xFFF4F6FB), 0.88);
 
     return AppPalette(
       // Primary cluster -> P2
@@ -204,7 +207,7 @@ class AppPalette {
       outline: outline,
       outlineVariant: outlineVariant,
 
-      cardShadow: p2.withValues(alpha: 0.05),
+      cardShadow: p2.withValues(alpha: 0.07),
     );
   }
 
@@ -379,8 +382,73 @@ class AppColors {
   // mobile bottom nav. `graphiteHigh` is TCB's brand navy (#022B60) and
   // `graphite` a deeper shade of it, so headers carry the brand instead of
   // reading black.
-  static const Color graphite = Color(0xFF011A3A);
-  static const Color graphiteHigh = Color(0xFF022B60);
+  static const Color graphite = Color(0xFF0A1433);
+  static const Color graphiteHigh = Color(0xFF14225C);
+
+  // ---- Modern accent set (brand-independent highlights) ----
+  static const Color violet = Color(0xFF7C5CFF);
+  static const Color sky = Color(0xFF38BDF8);
+  static const Color mint = Color(0xFF10B981);
+  static const Color amber = Color(0xFFF59E0B);
+  static const Color rose = Color(0xFFF43F5E);
+
+  /// Brand gradient used for primary CTAs and highlights.
+  static LinearGradient get brandGradient => LinearGradient(
+        begin: Alignment.topLeft,
+        end: Alignment.bottomRight,
+        colors: [primary, secondary],
+      );
+
+  /// Rich "aurora" gradient for hero headers (home, login, dashboards).
+  static LinearGradient get heroGradient => LinearGradient(
+        begin: Alignment.topLeft,
+        end: Alignment.bottomRight,
+        colors: [graphite, primary, Color.lerp(secondary, violet, 0.35)!],
+        stops: const [0.0, 0.55, 1.0],
+      );
+
+  /// Soft, layered shadow for floating surfaces.
+  static List<BoxShadow> softShadow([double strength = 1]) => [
+        BoxShadow(
+          color: primary.withValues(alpha: 0.06 * strength),
+          blurRadius: 24,
+          offset: const Offset(0, 10),
+        ),
+        BoxShadow(
+          color: primary.withValues(alpha: 0.04 * strength),
+          blurRadius: 4,
+          offset: const Offset(0, 1),
+        ),
+      ];
+
+  /// A distinct, vivid gradient per module so each Home tile has its own
+  /// identity while staying on-brand.
+  static List<Color> moduleGradient(String module) {
+    switch (module) {
+      case 'HR':
+        return const [Color(0xFF6366F1), Color(0xFF8B5CF6)];
+      case 'CRM':
+        return const [Color(0xFFEC4899), Color(0xFFF43F5E)];
+      case 'Finance':
+        return const [Color(0xFF10B981), Color(0xFF059669)];
+      case 'Stock':
+        return const [Color(0xFFF59E0B), Color(0xFFF97316)];
+      case 'Sales':
+        return const [Color(0xFF0EA5E9), Color(0xFF2563EB)];
+      case 'Purchase':
+        return const [Color(0xFF14B8A6), Color(0xFF0891B2)];
+      case 'Manufacturing':
+        return const [Color(0xFF64748B), Color(0xFF334155)];
+      case 'Manufacturing Masters':
+        return const [Color(0xFFA855F7), Color(0xFF7C3AED)];
+      case 'Projects':
+        return const [Color(0xFF3B82F6), Color(0xFF6366F1)];
+      case 'Admin':
+        return const [Color(0xFF1E293B), Color(0xFF475569)];
+      default:
+        return [primary, secondary];
+    }
+  }
 
   // Card shadow (tinted by primary)
   static Color cardShadow = AppPalette.tcbDefault.cardShadow;

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
@@ -56,7 +57,6 @@ class AppShell extends ConsumerWidget {
             body: Row(
               children: [
                 _SideRail(tiles: tiles),
-                VerticalDivider(width: 1, color: AppColors.outlineVariant),
                 Expanded(child: shell),
               ],
             ),
@@ -164,35 +164,53 @@ class _ScrollableBottomNav extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topCenter,
-          end: Alignment.bottomCenter,
-          colors: [AppColors.graphiteHigh, AppColors.graphite],
-        ),
-        borderRadius: BorderRadius.vertical(
-          top: Radius.circular(AppDimens.radiusXl),
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: AppColors.graphite.withValues(alpha: 0.35),
-            blurRadius: 14,
-            offset: const Offset(0, -4),
-          ),
-        ],
-      ),
-      child: SafeArea(
-        top: false,
-        child: SizedBox(
+    // A floating, rounded "dock" that hovers above the page with a soft
+    // shadow. Few tiles share the width evenly; many tiles scroll.
+    return SafeArea(
+      top: false,
+      minimum: const EdgeInsets.only(bottom: 10),
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(14, 4, 14, 0),
+        child: Container(
           height: AppDimens.bottomNavHeight,
-          child: SingleChildScrollView(
-            scrollDirection: Axis.horizontal,
-            padding: const EdgeInsets.symmetric(horizontal: AppDimens.sm),
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [for (final t in tiles) _BottomNavItem(tile: t)],
+          decoration: BoxDecoration(
+            color: AppColors.surfaceContainerLowest,
+            borderRadius: BorderRadius.circular(24),
+            border: Border.all(
+              color: AppColors.outlineVariant.withValues(alpha: 0.8),
             ),
+            boxShadow: [
+              BoxShadow(
+                color: AppColors.primary.withValues(alpha: 0.12),
+                blurRadius: 28,
+                offset: const Offset(0, 10),
+              ),
+              BoxShadow(
+                color: AppColors.primary.withValues(alpha: 0.05),
+                blurRadius: 6,
+                offset: const Offset(0, 2),
+              ),
+            ],
+          ),
+          child: LayoutBuilder(
+            builder: (context, c) {
+              const minTile = 72.0;
+              final fits = tiles.length * minTile <= c.maxWidth - 12;
+              final items = [
+                for (final t in tiles) _BottomNavItem(tile: t, expand: fits),
+              ];
+              if (fits) {
+                return Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 6),
+                  child: Row(children: items),
+                );
+              }
+              return SingleChildScrollView(
+                scrollDirection: Axis.horizontal,
+                padding: const EdgeInsets.symmetric(horizontal: 6),
+                child: Row(children: items),
+              );
+            },
           ),
         ),
       ),
@@ -201,65 +219,80 @@ class _ScrollableBottomNav extends StatelessWidget {
 }
 
 class _BottomNavItem extends StatelessWidget {
-  const _BottomNavItem({required this.tile});
+  const _BottomNavItem({required this.tile, required this.expand});
   final _NavTile tile;
+  final bool expand;
 
   @override
   Widget build(BuildContext context) {
     final selected = tile.selected;
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 3, vertical: 3),
+    final accent = AppColors.secondary;
+    final item = Semantics(
+      selected: selected,
+      button: true,
+      label: tile.label,
       child: InkWell(
-        onTap: tile.onTap,
-        borderRadius: BorderRadius.circular(999),
-        child: AnimatedContainer(
-          duration: const Duration(milliseconds: 150),
-          curve: Curves.easeOut,
-          padding: EdgeInsets.symmetric(
-            horizontal: selected ? 14 : 10,
-            vertical: 4,
-          ),
-          decoration: BoxDecoration(
-            color: selected
-                ? Colors.white.withValues(alpha: 0.16)
-                : Colors.transparent,
-            borderRadius: BorderRadius.circular(999),
-            border: selected
-                ? Border.all(color: Colors.white.withValues(alpha: 0.22))
-                : null,
-          ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(
-                selected ? tile.selectedIcon : tile.icon,
-                size: 20,
-                color: selected
-                    ? Colors.white
-                    : Colors.white.withValues(alpha: 0.62),
-              ),
-              const SizedBox(height: 1),
-              Text(
-                tile.label,
-                maxLines: 1,
-                softWrap: false,
-                overflow: TextOverflow.ellipsis,
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  fontSize: 10.5,
-                  height: 1.1,
-                  fontWeight: selected ? FontWeight.w700 : FontWeight.w500,
-                  color: selected
-                      ? Colors.white
-                      : Colors.white.withValues(alpha: 0.62),
-                  letterSpacing: 0.2,
+        onTap: () {
+          HapticFeedback.selectionClick();
+          tile.onTap();
+        },
+        borderRadius: BorderRadius.circular(18),
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(minWidth: 72, minHeight: 56),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 6),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                AnimatedContainer(
+                  duration: const Duration(milliseconds: 220),
+                  curve: Curves.easeOutCubic,
+                  width: selected ? 52 : 36,
+                  height: 30,
+                  decoration: BoxDecoration(
+                    gradient: selected
+                        ? LinearGradient(
+                            colors: [
+                              accent.withValues(alpha: 0.18),
+                              AppColors.violet.withValues(alpha: 0.14),
+                            ],
+                          )
+                        : null,
+                    borderRadius: BorderRadius.circular(999),
+                  ),
+                  alignment: Alignment.center,
+                  child: AnimatedSwitcher(
+                    duration: const Duration(milliseconds: 180),
+                    child: Icon(
+                      selected ? tile.selectedIcon : tile.icon,
+                      key: ValueKey(selected),
+                      size: 22,
+                      color: selected ? accent : AppColors.onSurfaceVariant,
+                    ),
+                  ),
                 ),
-              ),
-            ],
+                const SizedBox(height: 3),
+                Text(
+                  tile.label,
+                  maxLines: 1,
+                  softWrap: false,
+                  overflow: TextOverflow.ellipsis,
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontSize: 11,
+                    height: 1.1,
+                    fontWeight: selected ? FontWeight.w800 : FontWeight.w600,
+                    color: selected ? accent : AppColors.onSurfaceVariant,
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       ),
     );
+    return expand ? Expanded(child: item) : item;
   }
 }
 
@@ -271,10 +304,16 @@ class _SideRail extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       width: AppDimens.sidebarWidth,
-      color: AppColors.surface,
+      margin: const EdgeInsets.all(12),
       padding: const EdgeInsets.symmetric(
         horizontal: AppDimens.md,
         vertical: AppDimens.lg,
+      ),
+      decoration: BoxDecoration(
+        color: AppColors.surfaceContainerLowest,
+        borderRadius: BorderRadius.circular(AppDimens.radius3xl),
+        border: Border.all(color: AppColors.outlineVariant),
+        boxShadow: AppColors.softShadow(),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -282,28 +321,52 @@ class _SideRail extends StatelessWidget {
           Row(
             children: [
               Container(
-                width: 40,
-                height: 40,
+                width: 44,
+                height: 44,
                 decoration: BoxDecoration(
-                  color: AppColors.primaryContainer,
-                  borderRadius: BorderRadius.circular(AppDimens.radiusXl),
+                  gradient: AppColors.heroGradient,
+                  borderRadius: BorderRadius.circular(14),
                 ),
                 alignment: Alignment.center,
-                child: Text(
+                child: const Text(
                   'TCB',
-                  style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                    color: AppColors.onPrimaryContainer,
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.w800,
+                    fontSize: 13,
+                    letterSpacing: 0.5,
                   ),
                 ),
               ),
-              const SizedBox(width: AppDimens.sm),
-              Text(
-                'TCB Portal',
-                style: Theme.of(context).textTheme.headlineSmall,
+              const SizedBox(width: AppDimens.sm + 4),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'TCB Portal',
+                      style: Theme.of(context).textTheme.titleMedium,
+                    ),
+                    Text(
+                      'Employee workspace',
+                      style: Theme.of(context).textTheme.bodySmall,
+                    ),
+                  ],
+                ),
               ),
             ],
           ),
-          const SizedBox(height: AppDimens.xl),
+          const SizedBox(height: AppDimens.lg),
+          Padding(
+            padding: const EdgeInsets.only(left: 12, bottom: 8),
+            child: Text(
+              'MENU',
+              style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                letterSpacing: 1.4,
+                fontWeight: FontWeight.w800,
+              ),
+            ),
+          ),
           Expanded(
             child: ListView(
               padding: EdgeInsets.zero,
@@ -323,29 +386,42 @@ class _SideTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final selected = tile.selected;
+    final accent = AppColors.secondary;
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 2),
+      padding: const EdgeInsets.symmetric(vertical: 3),
       child: InkWell(
         onTap: tile.onTap,
-        borderRadius: BorderRadius.circular(999),
-        child: Container(
+        borderRadius: BorderRadius.circular(14),
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 180),
           padding: const EdgeInsets.symmetric(
-            horizontal: AppDimens.md,
+            horizontal: AppDimens.md - 4,
             vertical: AppDimens.sm + 4,
           ),
           decoration: BoxDecoration(
-            color: selected ? AppColors.secondaryFixed : Colors.transparent,
-            borderRadius: BorderRadius.circular(999),
+            color: selected
+                ? accent.withValues(alpha: 0.10)
+                : Colors.transparent,
+            borderRadius: BorderRadius.circular(14),
           ),
           child: Row(
             children: [
+              AnimatedContainer(
+                duration: const Duration(milliseconds: 180),
+                width: 4,
+                height: 20,
+                decoration: BoxDecoration(
+                  color: selected ? accent : Colors.transparent,
+                  borderRadius: BorderRadius.circular(4),
+                ),
+              ),
+              const SizedBox(width: 10),
               Icon(
                 selected ? tile.selectedIcon : tile.icon,
-                color: selected
-                    ? AppColors.onSecondaryFixed
-                    : AppColors.onSurfaceVariant,
+                size: 22,
+                color: selected ? accent : AppColors.onSurfaceVariant,
               ),
-              const SizedBox(width: AppDimens.sm),
+              const SizedBox(width: AppDimens.sm + 4),
               Flexible(
                 child: Text(
                   tile.label,
@@ -353,10 +429,8 @@ class _SideTile extends StatelessWidget {
                   softWrap: false,
                   overflow: TextOverflow.ellipsis,
                   style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                    color: selected
-                        ? AppColors.onSecondaryFixed
-                        : AppColors.onSurfaceVariant,
-                    fontWeight: selected ? FontWeight.w700 : FontWeight.w600,
+                    color: selected ? accent : AppColors.onSurface,
+                    fontWeight: selected ? FontWeight.w800 : FontWeight.w600,
                   ),
                 ),
               ),

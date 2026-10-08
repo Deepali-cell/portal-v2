@@ -21,60 +21,104 @@ class ModuleDashboardHeader extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.all(AppDimens.lg),
       decoration: BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [AppColors.graphite, AppColors.primary],
-        ),
-        borderRadius: BorderRadius.circular(AppDimens.radiusXl),
+        gradient: AppColors.heroGradient,
+        borderRadius: BorderRadius.circular(AppDimens.radius3xl),
         boxShadow: [
           BoxShadow(
-            color: AppColors.graphite.withValues(alpha: 0.25),
-            blurRadius: 16,
-            offset: const Offset(0, 8),
+            color: AppColors.primary.withValues(alpha: 0.28),
+            blurRadius: 26,
+            offset: const Offset(0, 12),
           ),
         ],
       ),
-      child: Row(
-        children: [
-          Container(
-            width: 48,
-            height: 48,
-            decoration: BoxDecoration(
-              color: Colors.white.withValues(alpha: 0.18),
-              borderRadius: BorderRadius.circular(AppDimens.radiusMd),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(AppDimens.radius3xl),
+        child: Stack(
+          children: [
+            Positioned(
+              right: -40,
+              top: -50,
+              child: _Glow(size: 170, color: AppColors.violet),
             ),
-            alignment: Alignment.center,
-            child: Icon(icon, color: Colors.white, size: 26),
-          ),
-          const SizedBox(width: AppDimens.md),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text(
-                  title,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                    color: Colors.white,
-                    fontWeight: FontWeight.w800,
-                  ),
-                ),
-                const SizedBox(height: 2),
-                Text(
-                  subtitle,
-                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: Colors.white.withValues(alpha: 0.85),
-                  ),
-                ),
-              ],
+            Positioned(
+              right: 12,
+              bottom: -26,
+              child: Icon(
+                icon,
+                size: 110,
+                color: Colors.white.withValues(alpha: 0.07),
+              ),
             ),
-          ),
-        ],
+            Padding(
+              padding: const EdgeInsets.all(AppDimens.lg),
+              child: Row(
+                children: [
+                  Container(
+                    width: 52,
+                    height: 52,
+                    decoration: BoxDecoration(
+                      color: Colors.white.withValues(alpha: 0.16),
+                      borderRadius: BorderRadius.circular(16),
+                      border: Border.all(
+                        color: Colors.white.withValues(alpha: 0.24),
+                      ),
+                    ),
+                    alignment: Alignment.center,
+                    child: Icon(icon, color: Colors.white, size: 26),
+                  ),
+                  const SizedBox(width: AppDimens.md),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(
+                          title,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: Theme.of(context).textTheme.headlineSmall
+                              ?.copyWith(
+                                color: Colors.white,
+                                fontWeight: FontWeight.w800,
+                              ),
+                        ),
+                        const SizedBox(height: 2),
+                        Text(
+                          subtitle,
+                          style: Theme.of(context).textTheme.bodyMedium
+                              ?.copyWith(
+                                color: Colors.white.withValues(alpha: 0.82),
+                              ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _Glow extends StatelessWidget {
+  const _Glow({required this.size, required this.color});
+  final double size;
+  final Color color;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: size,
+      height: size,
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        gradient: RadialGradient(
+          colors: [color.withValues(alpha: 0.5), color.withValues(alpha: 0)],
+        ),
       ),
     );
   }
@@ -93,8 +137,8 @@ class FlowSkeleton extends StatelessWidget {
           margin: EdgeInsets.only(bottom: i == rows - 1 ? 0 : AppDimens.md),
           height: 66,
           decoration: BoxDecoration(
-            color: AppColors.surfaceContainer,
-            borderRadius: BorderRadius.circular(AppDimens.radiusXl),
+            color: AppColors.surfaceContainerLow,
+            borderRadius: BorderRadius.circular(AppDimens.radius2xl),
           ),
         ),
       ),
@@ -137,10 +181,7 @@ class DashboardSectionTitle extends StatelessWidget {
       children: [
         Text(
           title,
-          style: Theme.of(context).textTheme.titleMedium?.copyWith(
-            color: AppColors.primary,
-            fontWeight: FontWeight.w800,
-          ),
+          style: Theme.of(context).textTheme.titleLarge,
         ),
         if (subtitle != null) ...[
           const SizedBox(height: 2),

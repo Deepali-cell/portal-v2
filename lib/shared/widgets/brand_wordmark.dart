@@ -57,19 +57,27 @@ class _Mark extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final logo = tenant?.logoUrl;
-    final radius = BorderRadius.circular(AppDimens.radiusLg);
+    final radius = BorderRadius.circular(size * 0.30);
     final tile = Container(
       height: size,
       width: size,
       decoration: BoxDecoration(
-        color: AppColors.primary,
+        gradient: AppColors.heroGradient,
         borderRadius: radius,
+        border: Border.all(color: Colors.white.withValues(alpha: 0.25)),
+        boxShadow: [
+          BoxShadow(
+            color: AppColors.secondary.withValues(alpha: 0.35),
+            blurRadius: 24,
+            offset: const Offset(0, 10),
+          ),
+        ],
       ),
       alignment: Alignment.center,
       child: Text(
         _monogram(),
         style: TextStyle(
-          color: AppColors.onPrimary,
+          color: Colors.white,
           fontSize: size * 0.28,
           fontWeight: FontWeight.w800,
           letterSpacing: 1,

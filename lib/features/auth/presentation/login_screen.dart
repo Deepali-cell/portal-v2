@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 
@@ -29,19 +30,46 @@ class LoginScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final tenant = ref.watch(tenantControllerProvider);
-    return Scaffold(
-      body: SafeArea(
-        child: Center(
-          child: SingleChildScrollView(
-            padding: const EdgeInsets.all(AppDimens.screenPadding),
-            child: ConstrainedBox(
-              constraints:
-                  const BoxConstraints(maxWidth: AppDimens.maxContentWidth),
-              child: tenant == null
-                  ? const _CompanyIdStep()
-                  : _SignInStep(tenant: tenant),
+    return AnnotatedRegion<SystemUiOverlayStyle>(
+      value: SystemUiOverlayStyle.light,
+      child: Scaffold(
+        backgroundColor: AppColors.background,
+        body: Stack(
+          children: [
+            const _AuroraBackdrop(),
+            SafeArea(
+              child: Center(
+                child: SingleChildScrollView(
+                  padding: const EdgeInsets.all(AppDimens.screenPadding),
+                  child: ConstrainedBox(
+                    constraints: const BoxConstraints(
+                      maxWidth: AppDimens.maxContentWidth,
+                    ),
+                    child: AnimatedSwitcher(
+                      duration: const Duration(milliseconds: 350),
+                      switchInCurve: Curves.easeOutCubic,
+                      transitionBuilder: (child, anim) => FadeTransition(
+                        opacity: anim,
+                        child: SlideTransition(
+                          position: Tween(
+                            begin: const Offset(0, 0.04),
+                            end: Offset.zero,
+                          ).animate(anim),
+                          child: child,
+                        ),
+                      ),
+                      child: tenant == null
+                          ? const _CompanyIdStep(key: ValueKey('company'))
+                          : _SignInStep(
+                              key: const ValueKey('signin'),
+                              tenant: tenant,
+                            ),
+                    ),
+                  ),
+                ),
+              ),
             ),
-          ),
+          ],
         ),
       ),
     );
@@ -53,7 +81,7 @@ class LoginScreen extends ConsumerWidget {
 // ============================================================================
 
 class _CompanyIdStep extends ConsumerStatefulWidget {
-  const _CompanyIdStep();
+  const _CompanyIdStep({super.key});
 
   @override
   ConsumerState<_CompanyIdStep> createState() => _CompanyIdStepState();
@@ -109,9 +137,9 @@ class _CompanyIdStepState extends ConsumerState<_CompanyIdStep> {
     }
     await _loadControlUrl();
     if (mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Server set to $_controlHost')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Server set to $_controlHost')));
     }
   }
 
@@ -130,8 +158,10 @@ class _CompanyIdStepState extends ConsumerState<_CompanyIdStep> {
       if (mounted) setState(() => _error = e.message);
     } catch (_) {
       if (mounted) {
-        setState(() => _error =
-            "Couldn't connect to the TCB server. Check your internet, then try again. Contact TCB Infotech if this keeps happening.");
+        setState(
+          () => _error =
+              "Couldn't connect to the TCB server. Check your internet, then try again. Contact TCB Infotech if this keeps happening.",
+        );
       }
     } finally {
       if (mounted) setState(() => _submitting = false);
@@ -146,72 +176,73 @@ class _CompanyIdStepState extends ConsumerState<_CompanyIdStep> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          const SizedBox(height: AppDimens.xxxl),
-          const BrandWordmark(size: 76),
-          const SizedBox(height: AppDimens.xxl),
-          Text(
-            'Sign in to TCB Portal',
-            textAlign: TextAlign.center,
-            style: theme.textTheme.headlineSmall,
-          ),
-          const SizedBox(height: AppDimens.xs),
-          Text(
-            'Enter your Company ID to continue.',
-            textAlign: TextAlign.center,
-            style: theme.textTheme.bodyMedium,
-          ),
-          const SizedBox(height: AppDimens.xxl),
-          TextFormField(
-            controller: _idCtrl,
-            textCapitalization: TextCapitalization.characters,
-            textInputAction: TextInputAction.done,
-            onFieldSubmitted: (_) => _continue(),
-            decoration: const InputDecoration(
-              labelText: 'Company ID',
-              hintText: 'e.g. TCB',
-              prefixIcon: Icon(Icons.domain_outlined),
-            ),
-            validator: (v) => (v == null || v.trim().isEmpty)
-                ? 'Enter your Company ID'
-                : null,
-          ),
-          if (_error != null) ...[
-            const SizedBox(height: AppDimens.lg),
-            _ErrorBanner(message: _error!),
-          ],
-          const SizedBox(height: AppDimens.xl),
-          BrandButton(
-            label: 'Continue',
-            loading: _submitting,
-            onPressed: _continue,
+          const _AuthHeader(
+            title: 'Welcome to TCB Portal',
+            subtitle: 'Your whole workday, in one place.',
           ),
           const SizedBox(height: AppDimens.xl),
-          Text(
-            "Don't know your Company ID? Contact TCB Infotech.",
-            textAlign: TextAlign.center,
-            style:
-                theme.textTheme.bodySmall?.copyWith(color: AppColors.inkFaint),
+          _AuthCard(
+            stepLabel: 'Step 1 of 2',
+            heading: 'Find your company',
+            caption: 'Enter the Company ID shared by your admin.',
+            children: [
+              TextFormField(
+                controller: _idCtrl,
+                textCapitalization: TextCapitalization.characters,
+                textInputAction: TextInputAction.done,
+                onFieldSubmitted: (_) => _continue(),
+                decoration: const InputDecoration(
+                  labelText: 'Company ID',
+                  hintText: 'e.g. TCB',
+                  prefixIcon: Icon(Icons.domain_outlined),
+                ),
+                validator: (v) => (v == null || v.trim().isEmpty)
+                    ? 'Enter your Company ID'
+                    : null,
+              ),
+              if (_error != null) ...[
+                const SizedBox(height: AppDimens.lg),
+                _ErrorBanner(message: _error!),
+              ],
+              const SizedBox(height: AppDimens.lg),
+              BrandButton(
+                label: 'Continue',
+                icon: Icons.arrow_forward_rounded,
+                loading: _submitting,
+                onPressed: _continue,
+              ),
+              const SizedBox(height: AppDimens.md),
+              const _HelpHint(
+                icon: Icons.help_outline_rounded,
+                text: "Don't know your Company ID? Contact TCB Infotech.",
+              ),
+            ],
           ),
-          const SizedBox(height: AppDimens.lg),
+          const SizedBox(height: AppDimens.md),
           // Control-server selector. Lets one build point at a different control
           // server (e.g. a laptop running its own) without a rebuild. The host
           // in effect is always shown so it is obvious which one you are on.
-          if (AppConfig.allowServerOverride) TextButton.icon(
-            onPressed: _submitting ? null : _changeServer,
-            icon: Icon(
-              _isCustomControl ? Icons.dns : Icons.dns_outlined,
-              size: 16,
-              color: _isCustomControl ? AppColors.primary : AppColors.inkFaint,
-            ),
-            label: Text(
-              _controlHost.isEmpty
-                  ? 'Change server'
-                  : 'Server: $_controlHost${_isCustomControl ? " (custom)" : ""}',
-              style: theme.textTheme.bodySmall?.copyWith(
-                color: _isCustomControl ? AppColors.primary : AppColors.inkFaint,
+          if (AppConfig.allowServerOverride)
+            TextButton.icon(
+              onPressed: _submitting ? null : _changeServer,
+              icon: Icon(
+                _isCustomControl ? Icons.dns : Icons.dns_outlined,
+                size: 16,
+                color: _isCustomControl
+                    ? AppColors.primary
+                    : AppColors.inkFaint,
+              ),
+              label: Text(
+                _controlHost.isEmpty
+                    ? 'Change server'
+                    : 'Server: $_controlHost${_isCustomControl ? " (custom)" : ""}',
+                style: theme.textTheme.bodySmall?.copyWith(
+                  color: _isCustomControl
+                      ? AppColors.primary
+                      : AppColors.inkFaint,
+                ),
               ),
             ),
-          ),
         ],
       ),
     );
@@ -230,8 +261,9 @@ class _ServerDialog extends StatefulWidget {
 }
 
 class _ServerDialogState extends State<_ServerDialog> {
-  late final TextEditingController _ctrl =
-      TextEditingController(text: widget.current);
+  late final TextEditingController _ctrl = TextEditingController(
+    text: widget.current,
+  );
   String? _error;
 
   @override
@@ -243,7 +275,9 @@ class _ServerDialogState extends State<_ServerDialog> {
   void _save() {
     final v = _ctrl.text.trim();
     if (v.isNotEmpty && !AppConfig.isAllowedServerUrl(v)) {
-      setState(() => _error = 'Must start with https:// (or http:// for local).');
+      setState(
+        () => _error = 'Must start with https:// (or http:// for local).',
+      );
       return;
     }
     Navigator.of(context).pop(v);
@@ -276,8 +310,9 @@ class _ServerDialogState extends State<_ServerDialog> {
           const SizedBox(height: AppDimens.sm),
           Text(
             'Default: ${AppConfig.middlewareBaseUrl}',
-            style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                color: AppColors.inkFaint),
+            style: Theme.of(
+              context,
+            ).textTheme.bodySmall?.copyWith(color: AppColors.inkFaint),
           ),
         ],
       ),
@@ -302,7 +337,7 @@ class _ServerDialogState extends State<_ServerDialog> {
 // ============================================================================
 
 class _SignInStep extends ConsumerStatefulWidget {
-  const _SignInStep({required this.tenant});
+  const _SignInStep({super.key, required this.tenant});
   final Tenant tenant;
 
   @override
@@ -339,8 +374,10 @@ class _SignInStepState extends ConsumerState<_SignInStep> {
       if (mounted) setState(() => _error = e.message);
     } catch (_) {
       if (mounted) {
-        setState(() => _error =
-            "Sign-in failed for an unknown reason. Please try again. If it keeps failing, contact TCB Infotech.");
+        setState(
+          () => _error =
+              "Sign-in failed for an unknown reason. Please try again. If it keeps failing, contact TCB Infotech.",
+        );
       }
     } finally {
       if (mounted) setState(() => _submitting = false);
@@ -387,81 +424,82 @@ class _SignInStepState extends ConsumerState<_SignInStep> {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
     return Form(
       key: _formKey,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          const SizedBox(height: AppDimens.xxxl),
-          const BrandWordmark(size: 76),
-          const SizedBox(height: AppDimens.xxl),
-          Text(
-            widget.tenant.companyName,
-            textAlign: TextAlign.center,
-            style: theme.textTheme.headlineSmall,
+          _AuthHeader(
+            title: widget.tenant.companyName,
+            subtitle: 'Good to see you again 👋',
           ),
-          const SizedBox(height: AppDimens.xs),
-          Text(
-            'Sign in to your employee account',
-            textAlign: TextAlign.center,
-            style: theme.textTheme.bodyMedium,
-          ),
-          const SizedBox(height: AppDimens.xxl),
-          TextFormField(
-            controller: _userCtrl,
-            keyboardType: TextInputType.emailAddress,
-            textInputAction: TextInputAction.next,
-            autofillHints: const [AutofillHints.username],
-            decoration: const InputDecoration(
-              labelText: 'Email or username',
-              prefixIcon: Icon(Icons.person_outline),
-            ),
-            validator: (v) => (v == null || v.trim().isEmpty)
-                ? 'Enter your email or username'
-                : null,
-          ),
-          const SizedBox(height: AppDimens.lg),
-          TextFormField(
-            controller: _pwdCtrl,
-            obscureText: _obscure,
-            textInputAction: TextInputAction.done,
-            autofillHints: const [AutofillHints.password],
-            onFieldSubmitted: (_) => _submit(),
-            decoration: InputDecoration(
-              labelText: 'Password',
-              prefixIcon: const Icon(Icons.lock_outline),
-              suffixIcon: IconButton(
-                icon: Icon(_obscure
-                    ? Icons.visibility_outlined
-                    : Icons.visibility_off_outlined),
-                onPressed: () => setState(() => _obscure = !_obscure),
-              ),
-            ),
-            validator: (v) =>
-                (v == null || v.isEmpty) ? 'Enter your password' : null,
-          ),
-          if (_error != null) ...[
-            const SizedBox(height: AppDimens.lg),
-            _ErrorBanner(message: _error!),
-          ],
           const SizedBox(height: AppDimens.xl),
-          BrandButton(
-            label: 'Sign in',
-            loading: _submitting,
-            onPressed: _submit,
+          _AuthCard(
+            stepLabel: 'Step 2 of 2',
+            heading: 'Sign in',
+            caption: 'Use your employee email or username.',
+            children: [
+              TextFormField(
+                controller: _userCtrl,
+                keyboardType: TextInputType.emailAddress,
+                textInputAction: TextInputAction.next,
+                autofillHints: const [AutofillHints.username],
+                decoration: const InputDecoration(
+                  labelText: 'Email or username',
+                  prefixIcon: Icon(Icons.person_outline),
+                ),
+                validator: (v) => (v == null || v.trim().isEmpty)
+                    ? 'Enter your email or username'
+                    : null,
+              ),
+              const SizedBox(height: AppDimens.md),
+              TextFormField(
+                controller: _pwdCtrl,
+                obscureText: _obscure,
+                textInputAction: TextInputAction.done,
+                autofillHints: const [AutofillHints.password],
+                onFieldSubmitted: (_) => _submit(),
+                decoration: InputDecoration(
+                  labelText: 'Password',
+                  prefixIcon: const Icon(Icons.lock_outline),
+                  suffixIcon: IconButton(
+                    icon: Icon(
+                      _obscure
+                          ? Icons.visibility_outlined
+                          : Icons.visibility_off_outlined,
+                    ),
+                    onPressed: () => setState(() => _obscure = !_obscure),
+                  ),
+                ),
+                validator: (v) =>
+                    (v == null || v.isEmpty) ? 'Enter your password' : null,
+              ),
+              if (_error != null) ...[
+                const SizedBox(height: AppDimens.lg),
+                _ErrorBanner(message: _error!),
+              ],
+              const SizedBox(height: AppDimens.lg),
+              BrandButton(
+                label: 'Sign in',
+                icon: Icons.login_rounded,
+                loading: _submitting,
+                onPressed: _submit,
+              ),
+              const SizedBox(height: AppDimens.sm),
+              Center(
+                child: TextButton.icon(
+                  onPressed: _submitting ? null : _switchCompany,
+                  icon: const Icon(Icons.swap_horiz_rounded, size: 18),
+                  label: const Text('Switch company'),
+                ),
+              ),
+            ],
           ),
           const SizedBox(height: AppDimens.lg),
-          TextButton(
-            onPressed: _submitting ? null : _switchCompany,
-            child: const Text('Switch company'),
-          ),
-          const SizedBox(height: AppDimens.md),
-          Text(
-            'Your credentials are encrypted on this device.',
-            textAlign: TextAlign.center,
-            style:
-                theme.textTheme.bodySmall?.copyWith(color: AppColors.inkFaint),
+          const _HelpHint(
+            icon: Icons.verified_user_outlined,
+            text: 'Your credentials are encrypted on this device.',
+            onDark: true,
           ),
         ],
       ),
@@ -473,6 +511,183 @@ class _SignInStepState extends ConsumerState<_SignInStep> {
 // Shared error banner
 // ============================================================================
 
+/// Full-bleed aurora gradient on the top half of the screen with soft glowing
+/// orbs, fading into the light canvas below.
+class _AuroraBackdrop extends StatelessWidget {
+  const _AuroraBackdrop();
+
+  @override
+  Widget build(BuildContext context) {
+    final h = MediaQuery.sizeOf(context).height;
+    Widget orb(double size, Color c) => Container(
+      width: size,
+      height: size,
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        gradient: RadialGradient(
+          colors: [c.withValues(alpha: 0.55), c.withValues(alpha: 0)],
+        ),
+      ),
+    );
+    return Positioned(
+      left: 0,
+      right: 0,
+      top: 0,
+      height: h * 0.52,
+      child: ClipRRect(
+        borderRadius: const BorderRadius.vertical(bottom: Radius.circular(40)),
+        child: DecoratedBox(
+          decoration: BoxDecoration(gradient: AppColors.heroGradient),
+          child: Stack(
+            children: [
+              Positioned(
+                top: -80,
+                right: -60,
+                child: orb(260, AppColors.violet),
+              ),
+              Positioned(
+                bottom: -90,
+                left: -70,
+                child: orb(240, AppColors.sky),
+              ),
+              Positioned(
+                top: h * 0.14,
+                left: h * 0.18,
+                child: orb(120, AppColors.secondary),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// Logo + title on the gradient.
+class _AuthHeader extends StatelessWidget {
+  const _AuthHeader({required this.title, required this.subtitle});
+  final String title;
+  final String subtitle;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return Column(
+      children: [
+        const SizedBox(height: AppDimens.lg),
+        const BrandWordmark(size: 72, showLabel: false),
+        const SizedBox(height: AppDimens.lg),
+        Text(
+          title,
+          textAlign: TextAlign.center,
+          style: theme.textTheme.headlineMedium?.copyWith(color: Colors.white),
+        ),
+        const SizedBox(height: 6),
+        Text(
+          subtitle,
+          textAlign: TextAlign.center,
+          style: theme.textTheme.bodyLarge?.copyWith(
+            color: Colors.white.withValues(alpha: 0.82),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+/// The white card that holds a login step's form.
+class _AuthCard extends StatelessWidget {
+  const _AuthCard({
+    required this.stepLabel,
+    required this.heading,
+    required this.caption,
+    required this.children,
+  });
+  final String stepLabel;
+  final String heading;
+  final String caption;
+  final List<Widget> children;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return Container(
+      padding: const EdgeInsets.fromLTRB(22, 22, 22, 18),
+      decoration: BoxDecoration(
+        color: AppColors.surfaceContainerLowest,
+        borderRadius: BorderRadius.circular(AppDimens.radius3xl),
+        boxShadow: [
+          BoxShadow(
+            color: AppColors.graphite.withValues(alpha: 0.16),
+            blurRadius: 40,
+            offset: const Offset(0, 18),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Align(
+            alignment: Alignment.centerLeft,
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+              decoration: BoxDecoration(
+                color: AppColors.secondary.withValues(alpha: 0.10),
+                borderRadius: BorderRadius.circular(999),
+              ),
+              child: Text(
+                stepLabel,
+                style: theme.textTheme.labelMedium?.copyWith(
+                  color: AppColors.secondary,
+                  fontWeight: FontWeight.w800,
+                ),
+              ),
+            ),
+          ),
+          const SizedBox(height: AppDimens.sm + 4),
+          Text(heading, style: theme.textTheme.headlineSmall),
+          const SizedBox(height: 2),
+          Text(caption, style: theme.textTheme.bodyMedium),
+          const SizedBox(height: AppDimens.lg),
+          ...children,
+        ],
+      ),
+    );
+  }
+}
+
+class _HelpHint extends StatelessWidget {
+  const _HelpHint({
+    required this.icon,
+    required this.text,
+    this.onDark = false,
+  });
+  final IconData icon;
+  final String text;
+  final bool onDark;
+
+  @override
+  Widget build(BuildContext context) {
+    final color = AppColors.onSurfaceVariant;
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        Icon(icon, size: 16, color: color),
+        const SizedBox(width: 6),
+        Flexible(
+          child: Text(
+            text,
+            textAlign: TextAlign.center,
+            style: Theme.of(
+              context,
+            ).textTheme.bodySmall?.copyWith(color: color),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
 class _ErrorBanner extends StatelessWidget {
   const _ErrorBanner({required this.message});
   final String message;
@@ -483,8 +698,8 @@ class _ErrorBanner extends StatelessWidget {
       padding: const EdgeInsets.all(AppDimens.md),
       decoration: BoxDecoration(
         color: AppColors.danger.withValues(alpha: 0.08),
-        borderRadius: BorderRadius.circular(AppDimens.radiusMd),
-        border: Border.all(color: AppColors.danger.withValues(alpha: 0.3)),
+        borderRadius: BorderRadius.circular(AppDimens.radiusLg),
+        border: Border.all(color: AppColors.danger.withValues(alpha: 0.25)),
       ),
       child: Row(
         children: [

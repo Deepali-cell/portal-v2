@@ -18,17 +18,17 @@ class AppDimens {
   static const double screenPadding = 20; // margin-mobile = 20px
 
   // Corner radii
-  static const double radiusSm = 8;
-  static const double radiusMd = 12; // “xl” in mockup = 12px
-  static const double radiusLg = 12;
-  static const double radiusXl = 16; // “2xl”
-  static const double radius2xl = 16;
-  static const double radius3xl = 24;
+  static const double radiusSm = 10;
+  static const double radiusMd = 14;
+  static const double radiusLg = 16;
+  static const double radiusXl = 20;
+  static const double radius2xl = 24;
+  static const double radius3xl = 28;
 
   // Components
-  static const double buttonHeight = 48;
+  static const double buttonHeight = 52;
   static const double fieldHeight = 56;
   static const double maxContentWidth = 480;
   static const double sidebarWidth = 280;
-  static const double bottomNavHeight = 62;
+  static const double bottomNavHeight = 66;
 }
